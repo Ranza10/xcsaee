@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>xcsaee</title>
+<style>
+html, body { height: 100%; }
+/*
+  Layout concept: a Discord profile popout, floating over the same
+  misty swamp-forest photo used for the page backdrop — banner at the
+  top of the card, avatar cut into it, status line, a bio section that
+  lists each platform the way Discord lists connections. Single
+  committed dark theme (Discord has no light mode to borrow either).
+*/
+:root {
+  --bg: #000000;
+  --card-bg: #1e1f22;
+  --card-head: #232428;
+  --row-bg: #2b2d31;
+  --row-bg-hover: #35373c;
+  --text: #f2f3f5;
+  --text-dim: #b5bac1;
+  --text-muted: #949ba4;
+  --divider: #3a3c42;
+  --blurple: #5865f2;
+  --online: #23a55a;
+  color-scheme: dark;
+
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100%;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.5), rgba(0,0,0,0.82) 55%, #000 100%),
+    url("forest.jpg") center 22% / cover no-repeat fixed,
+    var(--bg);
+  color: var(--text);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  display: flex;
+  justify-content: center;
+  overflow-x: hidden;
+}
+
+.page {
+  width: 100%;
+  max-width: 460px;
+  padding-block: 56px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+
+/* ---- the popout card ---- */
+.card {
+  width: 100%;
+  background: var(--card-bg);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px -24px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+.banner {
+  height: 112px;
+  background: url("forest.jpg") center 18% / cover no-repeat;
+  position: relative;
+}
+.banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.1), var(--card-head) 100%);
+}
+
+.card-head {
+  background: var(--card-head);
+  padding: 0 20px 16px;
+  position: relative;
+}
+
+.avatar-wrap {
+  width: 84px;
+  height: 84px;
+  margin-top: -42px;
+  position: relative;
+}
+.avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: url("forest.jpg") center 30% / cover no-repeat, #111214;
+  border: 6px solid var(--card-head);
+  display: block;
+}
+.status-dot {
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--online);
+  border: 5px solid var(--card-head);
+}
+
+.id-block {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.display-name {
+  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.handle {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.status-line {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.status-line::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--online);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--online) 18%, transparent);
+  flex: none;
+}
+
+.card-body {
+  padding: 16px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.divider {
+  height: 1px;
+  background: var(--divider);
+  border: none;
+  margin: 0;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ---- link rows, styled like Discord's connected-account list ---- */
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.link-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--row-bg);
+  border: none;
+  color: var(--text);
+  text-decoration: none;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.link-row:hover,
+.link-row:focus-visible {
+  background: var(--row-bg-hover);
+  outline: none;
+}
+
+.icon {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--platform, var(--blurple)) 22%, var(--row-bg));
+  color: var(--platform, var(--blurple));
+}
+.icon svg { width: 17px; height: 17px; fill: currentColor; }
+
+.link-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+}
+.link-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+.link-sub {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.go {
+  flex: none;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.copy-btn {
+  flex: none;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.06);
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  transition: color 0.12s ease, background 0.12s ease;
+}
+.copy-btn:hover, .copy-btn:focus-visible {
+  color: var(--text);
+  background: rgba(255,255,255,0.12);
+  outline: none;
+}
+
+footer {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Inter:wght@400;500;600;700&display=swap">
+</head>
+<body>
+
+<div class="page">
+  <div class="card">
+    <div class="banner"></div>
+
+    <div class="card-head">
+      <div class="avatar-wrap">
+        <div class="avatar"></div>
+        <div class="status-dot"></div>
+      </div>
+      <div class="id-block">
+        <div class="display-name">xcsaee</div>
+        <div class="handle">@xcsaee</div>
+      </div>
+      <div class="status-line">в сети</div>
+    </div>
+
+    <div class="card-body">
+      <hr class="divider">
+
+      <div class="section">
+        <div class="section-label">Ссылки</div>
+        <div class="links">
+          <a class="link-row" href="https://twitch.tv/xcsaee" target="_blank" rel="noopener" style="--platform:#9146FF">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M4 2 2 6v14h6v2h3l2-2h4l4-4V2H4Zm16 13-3 3h-4l-2 2v-2H6V4h14v11Z"/><path d="M9 7h2v5H9V7Zm5 0h2v5h-2V7Z"/></svg></span>
+            <span class="link-text">
+              <span class="link-title">Twitch</span>
+              <span class="link-sub">twitch.tv/xcsaee</span>
+            </span>
+            <span class="go">→</span>
+          </a>
+
+          <a class="link-row" href="https://t.me/+N0oHNv5_9CtjMzcy" target="_blank" rel="noopener" style="--platform:#2AABEE">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M21.5 3.5 2.3 11c-.9.35-.9 1.6.03 1.9l4.8 1.5 1.85 5.9c.28.9 1.4 1.1 1.95.35l2.6-3.5 4.95 3.65c.8.6 1.95.17 2.15-.8l3.1-14.7c.22-1.04-.8-1.9-1.28-1.8Zm-3.1 3.5L9.4 13.6l-.35 3.5-1.5-4.8L18.4 7Z"/></svg></span>
+            <span class="link-text">
+              <span class="link-title">Telegram</span>
+              <span class="link-sub">t.me/+N0oHNv5_9CtjMzcy</span>
+            </span>
+            <span class="go">→</span>
+          </a>
+
+          <button class="link-row" type="button" style="--platform:#5865F2" onclick="copyText('xcsaee', this)">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M19.3 5.3A17 17 0 0 0 15 4l-.4.8a13 13 0 0 1 3.6 1.3A14 14 0 0 0 12 5a14 14 0 0 0-6.2 1.1A13 13 0 0 1 9.4 4.8L9 4a17 17 0 0 0-4.3 1.3C2.4 9 1.8 12.6 2 16.1a17 17 0 0 0 5.1 2.5l.9-1.4a10 10 0 0 1-1.6-.8l.4-.3a12.3 12.3 0 0 0 10.4 0l.4.3c-.5.3-1 .6-1.6.8l.9 1.4a17 17 0 0 0 5.1-2.5c.3-4.2-.6-7.8-2.7-10.8ZM9.6 14.3c-.8 0-1.4-.7-1.4-1.6s.6-1.6 1.4-1.6 1.4.7 1.4 1.6-.6 1.6-1.4 1.6Zm4.8 0c-.8 0-1.4-.7-1.4-1.6s.6-1.6 1.4-1.6 1.4.7 1.4 1.6-.6 1.6-1.4 1.6Z"/></svg></span>
+            <span class="link-text">
+              <span class="link-title">Discord</span>
+              <span class="link-sub" id="ds-tag">xcsaee</span>
+            </span>
+            <span class="copy-btn" id="ds-copy-label">Copy</span>
+          </button>
+
+          <a class="link-row" href="https://steamcommunity.com/profiles/76561199422160931/" target="_blank" rel="noopener" style="--platform:#66c0f4">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-9.95 9l5.6 2.3a3 3 0 0 1 1.7-.5l2.1-3a3.4 3.4 0 1 1 1.1 1.6l-3 2.2a3 3 0 1 1-4.2 3L2 15a10 10 0 1 0 10-13Zm-1.3 15.2a2 2 0 1 0-1.5-3.7l1.5.6a1.3 1.3 0 0 1 .9 2.4l-.9-.3Zm5-7a2.3 2.3 0 1 0 0-4.6 2.3 2.3 0 0 0 0 4.6Z"/></svg></span>
+            <span class="link-text">
+              <span class="link-title">Steam</span>
+              <span class="link-sub">steamcommunity.com/profiles/…931</span>
+            </span>
+            <span class="go">→</span>
+          </a>
+
+          <a class="link-row" href="https://www.tiktok.com/@ranza_official" target="_blank" rel="noopener" style="--platform:#ff2d55">
+            <span class="icon"><svg viewBox="0 0 24 24"><path d="M16.6 2h-3.2v13.4a3.2 3.2 0 1 1-2.3-3.1V8.9a6.6 6.6 0 1 0 5.5 6.5V8.3a8.4 8.4 0 0 0 4.8 1.5V6.6a4.6 4.6 0 0 1-4.8-4.6Z"/></svg></span>
+            <span class="link-text">
+              <span class="link-title">TikTok</span>
+              <span class="link-sub">@ranza_official</span>
+            </span>
+            <span class="go">→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>made with claude</footer>
+</div>
+
+<script>
+function copyText(text, btn) {
+  var label = document.getElementById('ds-copy-label');
+  function done(ok) {
+    if (!label) return;
+    label.textContent = ok ? 'Copied' : 'Copy';
+    if (ok) setTimeout(function () { label.textContent = 'Copy'; }, 1400);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () { done(true); }).catch(function () {
+      fallbackCopy(text);
+      done(true);
+    });
+  } else {
+    fallbackCopy(text);
+    done(true);
+  }
+}
+function fallbackCopy(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  document.body.removeChild(ta);
+}
+</script>
+</body>
+</html>
